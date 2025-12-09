@@ -25,12 +25,9 @@ NUM = N()
 
 class Rinda:
     def __init__(self) -> None:
-        self.rinda: int = 0
-        self.accSize: int = 0
-        self.ienak: int = 0
+        self.rinda = 0
 
     def push(self) -> None:
-        self.ienak += 1
         self.rinda += 1
 
     def pull(self) -> bool:
@@ -38,9 +35,6 @@ class Rinda:
             self.rinda -= 1
             return True
         return False
-
-    def updateAcc(self) -> None:
-        self.accSize += self.rinda
 
 
 class Avots:
@@ -82,7 +76,6 @@ class Kanals:
         self.nextEventAt: int = 0
         self.isWorking: bool = False
         self.apstr: int = 0
-        self.t_start: int = -1
 
     def _getTime(self) -> int:
         num = self.distrib[0] + (GAD_SK[NUM.get()] // self._size)
@@ -95,8 +88,6 @@ class Kanals:
         if self.isWorking:
             self.apstr += 1
             self.isWorking = False
-        else:
-            self.t_start = t  # pirmā pieprasījuma apstrādes uzsākšanas moments
 
         if self.from1:
             if self.r1.pull():
@@ -121,6 +112,21 @@ class Kanals:
                 return 1
             return None
 
+# Notikumu tabulas izvadei - pašpārbaudei
+def pprint(cur, old) -> None:
+    if cur[0] != old[0]:
+        print("├────┼────┼────┼────┼────┼────┼────┼────┼───┤")
+
+    def fmt(X): return str(cur[X])+" " * \
+        (2-len(str(cur[X]))) if (cur[X] != old[X]) and (cur[X] != None) else "  "
+
+    last = str(cur[8]) if cur[8] != old[8] else " "
+    row = (
+        f"│ {fmt(0)} │ {fmt(1)} │ {fmt(2)} │ {fmt(3)} │ {fmt(4)} │ "
+        f"{fmt(5)} │ {fmt(6)} │ {fmt(7)} │ {last} │"
+    )
+    print(row)
+
 
 def main() -> None:
     R1 = Rinda()
@@ -130,40 +136,69 @@ def main() -> None:
     K1 = Kanals((2, 6), R1, R2)
     t: int = 0
     MAX_APSTR: int = 5
+    curent: list[int] = [None]*9
+    old: list[int] = [None]*9
+
+    print("┌────┬────┬────┬────┬────┬────┬────┬────┬───┐")
+    print("│ t  │ n  │ A1 │ A2 │ K1 │ R1 │ R2 │ K1 │ N │")
 
     while (K1.apstr < MAX_APSTR):
         ek1 = K1.run(t)
+        if ek1 != None:
+            old = curent.copy()
+            curent[0] = t
+            curent[1] = NUM.N
+            curent[4] = K1.nextEventAt
+            curent[7] = int(K1.isWorking)
+            curent[8] = K1.apstr
+            if ek1 == 1:
+                curent[5] = R1.rinda
+            if ek1 == 2:
+                curent[6] = R2.rinda
+
+            pprint(curent, old)
         ea1 = A1.run(t)
+        if ea1 != None:
+            old = curent.copy()
+            curent[0] = t
+            curent[1] = NUM.N
+            curent[2] = A1.nextEventAt
+            curent[5] = R1.rinda
+
+            pprint(curent, old)
+
         ea2 = A2.run(t)
+        if ea2 != None:
+            old = curent.copy()
+            curent[0] = t
+            curent[1] = NUM.N
+            curent[3] = A2.nextEventAt
+            curent[6] = R2.rinda
+
+            pprint(curent, old)
+        
         if (ek1 == None and (ea1 != None or ea2 != None)):
-            K1.run(t)
-        R1.updateAcc()
-        R2.updateAcc()
+            ek2 = K1.run(t)
+            if ek2 != None:
+                old = curent.copy()
+                curent[0] = t
+                curent[1] = NUM.N
+                curent[4] = K1.nextEventAt
+                curent[7] = int(K1.isWorking)
+                curent[8] = K1.apstr
+                if ek2 == 1:
+                    curent[5] = R1.rinda
+                if ek2 == 2:
+                    curent[6] = R2.rinda
+
+                pprint(curent, old)
+
         t += 1
+    print("└────┴────┴────┴────┴────┴────┴────┴────┴───┘")
 
-    # Izvada modelēšanas rezultātus tabulas formātā
 
-    t = t - 1  # Pēdējais cikls palielināja t pēc pabeigšanas.
-    L1: float = R1.accSize / t
-    T1: float = R1.accSize / R1.ienak
-    L2: float = R2.accSize / t
-    T2: float = R2.accSize / R2.ienak
-    N1: float = (t - K1.t_start) / t
 
-    print("┌────┬───────┐")
-    print(f"│ L1 │ {format(L1, ".3f")} │")
-    print("├────┼───────┤")
-    print(f"│ T1 │ {format(T1, ".3f")} │")
-    print("├────┼───────┤")
-    print(f"│ L2 │ {format(L2, ".3f")} │")
-    print("├────┼───────┤")
-    print(f"│ T2 │ {format(T2, ".3f")} │")
-    print("├────┼───────┤")
-    print(f"│ N1 │ {format(N1, ".3f")} │")
-    print("└────┴───────┘")
-   
 
-    
 
 
 if __name__ == "__main__":
