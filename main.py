@@ -10,6 +10,9 @@ GAD_SK = [0, 0.957, 0.934, 0.564, 0.088, 0.464,
           0.336, 0.721, 0.613, 0.061, 0.919,
           0.674, 0.100, 0.777, 0.940, 0.101]
 
+def center(val: int|str, size: int) -> str:
+    spaces = size - len(str(val))
+    return f"{" "*(spaces-(spaces//2))}{val}{" "*(spaces//2)}"
 
 class N:
     def __init__(self):
@@ -144,23 +147,27 @@ def main() -> None:
     # Izvada modelēšanas rezultātus tabulas formātā
 
     t = t - 1  # Pēdējais cikls palielināja t pēc pabeigšanas.
-    L1: float = R1.accSize / t
-    T1: float = R1.accSize / R1.ienak
-    L2: float = R2.accSize / t
-    T2: float = R2.accSize / R2.ienak
-    N1: float = (t - K1.t_start) / t
+    RESULTS: list[tuple[str,int|float]] = []
+    RESULTS.append(("L1", R1.accSize / t ))
+    RESULTS.append(("T1", R1.accSize / R1.ienak))
+    RESULTS.append(("L2", R2.accSize / t))
+    RESULTS.append(("T2", R2.accSize / R2.ienak))
+    RESULTS.append(("N1", (t - K1.t_start) / t))
+    RESULTS.append(("Modelēšanas laiks", t))
+    RESULTS.append(("Izmantotie gadījuma skaitļi", NUM.N-1))
 
-    print("┌────┬───────┐")
-    print(f"│ L1 │ {format(L1, ".3f")} │")
-    print("├────┼───────┤")
-    print(f"│ T1 │ {format(T1, ".3f")} │")
-    print("├────┼───────┤")
-    print(f"│ L2 │ {format(L2, ".3f")} │")
-    print("├────┼───────┤")
-    print(f"│ T2 │ {format(T2, ".3f")} │")
-    print("├────┼───────┤")
-    print(f"│ N1 │ {format(N1, ".3f")} │")
-    print("└────┴───────┘")
+    MAX_WIDTH = max([len(x[0]) for x in RESULTS])+2
+    print(f"┌{"─"*MAX_WIDTH}┬───────┐")
+    for i, item in enumerate(RESULTS):
+
+        key, val = item
+        if type(val) == float:
+            print(f"│{center(key, MAX_WIDTH)}│ {center(format(val, ".3f"),5)} │")
+        else:
+            print(f"│{center(key,MAX_WIDTH)}│ {center(val,5)} │")
+        if i+1 != len(RESULTS): print(f"├{"─"*MAX_WIDTH}┼───────┤")
+
+    print(f"└{"─"*MAX_WIDTH}┴───────┘")
    
 
     
