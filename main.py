@@ -56,7 +56,7 @@ class Rinda:
         self.accSize += self.rinda
 
 # Visi gadījuma skaitļu sadalījumu aprēķini
-class Distribution_dependant:
+class Sadalijums:
     def __init__(self, distrib: tuple[int,int]):
         self.distrib: tuple[int, int] = distrib
         self._size: float = 1 / (distrib[1] - distrib[0] + 1)
@@ -67,7 +67,7 @@ class Distribution_dependant:
         return int(num)
 
 # Avota implementācija
-class Avots(Distribution_dependant):
+class Avots(Sadalijums):
     def __init__(self, distrib: tuple[int, int], rinda: Rinda) -> None:
         super().__init__(distrib)
 
@@ -90,7 +90,7 @@ class Avots(Distribution_dependant):
         return NUM.N
 
 # Pieprasījumu apstrādes kanāla 
-class Kanals(Distribution_dependant):
+class Kanals(Sadalijums):
     def __init__(self, distrib: tuple[int, int], r1: Rinda, r2: Rinda) -> None:
         super().__init__(distrib)
 
